@@ -89,14 +89,14 @@ LLM_MODEL=openrouter/free
 - `workflow_dispatch` 手动触发
 - 使用 `npm ci` 安装依赖
 - 执行前先跑 `npm run check`
-- 通过 Actions cache 持久化 `data/history.json`，避免每次都从空历史开始
+- 每次运行后自动把最新的 `data/history.json` 提交回仓库，作为去重历史
 
-关于 `history.json` 的缓存行为：
+关于 `history.json` 的持久化行为：
 
-- 每次运行开始时，会先从 GitHub Actions cache 恢复最近一次保存的 `data/history.json`
-- 每次运行结束后，会把本次更新后的 `data/history.json` 再保存回 cache
+- 每次运行都会直接使用仓库里的 `data/history.json`
+- 如果本次有新增条目，workflow 结束后会自动提交更新后的 `data/history.json`
 - 如果某天没有新条目，`history.json` 可能基本不变；这是正常现象，说明去重仍在生效
-- 如果 GitHub 清理了 cache，历史会回到空文件，那一天可能会重新发送一次旧条目
+- 这样不会依赖 GitHub Actions cache，也不会出现“仓库文件和 cache 内容不一致”的问题
 
 需要在仓库 Secrets 中配置：
 
