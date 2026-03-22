@@ -91,6 +91,13 @@ LLM_MODEL=openrouter/free
 - 执行前先跑 `npm run check`
 - 通过 Actions cache 持久化 `data/history.json`，避免每次都从空历史开始
 
+关于 `history.json` 的缓存行为：
+
+- 每次运行开始时，会先从 GitHub Actions cache 恢复最近一次保存的 `data/history.json`
+- 每次运行结束后，会把本次更新后的 `data/history.json` 再保存回 cache
+- 如果某天没有新条目，`history.json` 可能基本不变；这是正常现象，说明去重仍在生效
+- 如果 GitHub 清理了 cache，历史会回到空文件，那一天可能会重新发送一次旧条目
+
 需要在仓库 Secrets 中配置：
 
 - `LLM_API_KEY`
