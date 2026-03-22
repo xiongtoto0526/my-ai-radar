@@ -1,19 +1,4 @@
 {
-  "updatedAt": "2026-03-22T03:22:00.090Z",
-  "items": [
-    {
-      "fingerprint": "composer 2|2026-03-19t00:00:00.000z|https://cursor.com/blog/composer-2",
-      "name": "Composer 2",
-      "publishedAt": "2026-03-19T00:00:00.000Z",
-      "sourceUrl": "https://cursor.com/blog/composer-2",
-      "createdAt": "2026-03-22T03:22:00.090Z"
-    },
-    {
-      "fingerprint": "github copilot|2026-03-20|https://github.blog/changelog/2026-03-20-copilot-usage-metrics-now-resolve-auto-model-selection-to-actual-models",
-      "name": "GitHub Copilot",
-      "publishedAt": "2026-03-20",
-      "sourceUrl": "https://github.blog/changelog/2026-03-20-copilot-usage-metrics-now-resolve-auto-model-selection-to-actual-models",
-      "createdAt": "2026-03-22T03:22:00.090Z"
-    }
-  ]
+  "updatedAt": null,
+  "items": []
 }
