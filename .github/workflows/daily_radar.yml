@@ -1,0 +1,31 @@
+name: Daily AI Radar
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-radar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run daily radar
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          WECHAT_WEBHOOK: ${{ secrets.WECHAT_WEBHOOK }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          RADAR_TARGET_URLS: ${{ secrets.RADAR_TARGET_URLS }}
+        run: npm run radar
