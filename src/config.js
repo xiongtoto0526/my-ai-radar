@@ -10,6 +10,11 @@ const DEFAULT_TARGET_SITES = [
     name: 'Cursor Changelog',
     url: 'https://cursor.com/changelog',
     extractStrategy: 'latest-release'
+  },
+  {
+    name: 'Gemini API Changelog',
+    url: 'https://ai.google.dev/gemini-api/docs/changelog',
+    extractStrategy: 'latest-release'
   }
 ];
 
@@ -62,7 +67,8 @@ function getTargetSiteStrategy(url) {
 
     if (
       (parsedUrl.hostname === 'github.blog' && parsedUrl.pathname.includes('/changelog/label/copilot')) ||
-      (parsedUrl.hostname === 'cursor.com' && parsedUrl.pathname.includes('/changelog'))
+      (parsedUrl.hostname === 'cursor.com' && parsedUrl.pathname.includes('/changelog')) ||
+      (parsedUrl.hostname === 'ai.google.dev' && parsedUrl.pathname.includes('/gemini-api/docs/changelog'))
     ) {
       return 'latest-release';
     }
@@ -83,6 +89,10 @@ function getTargetSiteName(url, index) {
 
     if (parsedUrl.hostname === 'cursor.com' && parsedUrl.pathname.includes('/changelog')) {
       return 'Cursor Changelog';
+    }
+
+    if (parsedUrl.hostname === 'ai.google.dev' && parsedUrl.pathname.includes('/gemini-api/docs/changelog')) {
+      return 'Gemini API Changelog';
     }
 
     return parsedUrl.hostname.replace(/^www\./, '');

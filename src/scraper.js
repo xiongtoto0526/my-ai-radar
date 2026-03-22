@@ -132,6 +132,35 @@ function extractGitHubLatestRelease(markdown) {
   };
 }
 
+function buildGoogleChangelogAnchor(publishedAt) {
+  const match = publishedAt.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return '';
+  }
+
+  return `#${match[2]}-${match[3]}-${match[1]}`;
+}
+
+function extractGoogleLatestRelease(markdown, sourceUrl) {
+  const entryMatch = markdown.match(/##\s+([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})([\s\S]*?)(?=\n##\s+[A-Za-z]+\s+\d{1,2},\s+\d{4}|$)/);
+
+  if (!entryMatch) {
+    return null;
+  }
+
+  const officialPublishedAt = formatIsoDate(entryMatch[3], entryMatch[1], entryMatch[2]);
+  const anchor = buildGoogleChangelogAnchor(officialPublishedAt);
+
+  return {
+    content: [
+      officialPublishedAt ? `Official Published Time: ${officialPublishedAt}` : null,
+      `## ${entryMatch[1]} ${entryMatch[2]}, ${entryMatch[3]}${entryMatch[4]}`.trim()
+    ].filter(Boolean).join('\n\n'),
+    officialPublishedAt,
+    entryUrl: `${sourceUrl}${anchor}`
+  };
+}
+
 async function prepareSourceContent(site, markdown, options) {
   if (site.extractStrategy !== 'latest-release') {
     return {
@@ -154,6 +183,17 @@ async function prepareSourceContent(site, markdown, options) {
 
   if (site.url.includes('github.blog/changelog/label/copilot')) {
     const latestRelease = extractGitHubLatestRelease(markdown);
+    if (latestRelease) {
+      return {
+        content: truncateContent(latestRelease.content, options.maxContentChars),
+        officialPublishedAt: latestRelease.officialPublishedAt,
+        entryUrl: latestRelease.entryUrl
+      };
+    }
+  }
+
+  if (site.url.includes('ai.google.dev/gemini-api/docs/changelog')) {
+    const latestRelease = extractGoogleLatestRelease(markdown, site.url);
     if (latestRelease) {
       return {
         content: truncateContent(latestRelease.content, options.maxContentChars),

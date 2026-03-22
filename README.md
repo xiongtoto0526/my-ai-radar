@@ -15,6 +15,7 @@
 
 - GitHub Copilot Changelog
 - Cursor Changelog
+- Gemini API Changelog
 
 也可以通过 `.env` 里的 `RADAR_TARGET_URLS` 覆盖。
 
@@ -107,7 +108,7 @@ LLM_BASE_URL=https://openrouter.ai/api/v1
 WECHAT_WEBHOOK=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
 LLM_MODEL=openrouter/free
 LLM_MODEL_FALLBACKS=
-RADAR_TARGET_URLS=https://github.blog/changelog/label/copilot,https://cursor.com/changelog
+RADAR_TARGET_URLS=https://github.blog/changelog/label/copilot,https://cursor.com/changelog,https://ai.google.dev/gemini-api/docs/changelog
 ```
 
 配置步骤：

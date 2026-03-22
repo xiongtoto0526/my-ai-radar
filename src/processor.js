@@ -1,3 +1,5 @@
+const { createFingerprint } = require('./historyStore');
+
 function buildMessages(source, knownFingerprints) {
   const systemPrompt = [
     '你是一个严谨的 AI 产品情报编辑。',
@@ -260,6 +262,18 @@ function parseLlmResponse(messageContent) {
   throw new Error('Failed to parse structured JSON from LLM response');
 }
 
+function normalizeSourceItemName(name, source) {
+  if (source.sourceUrl.includes('github.blog/changelog/label/copilot')) {
+    return 'GitHub Copilot';
+  }
+
+  if (source.sourceUrl.includes('ai.google.dev/gemini-api/docs/changelog')) {
+    return 'Gemini API';
+  }
+
+  return name;
+}
+
 function sanitizeItems(items, source) {
   if (!Array.isArray(items)) {
     return [];
@@ -268,7 +282,7 @@ function sanitizeItems(items, source) {
   return items
     .filter((item) => item && typeof item === 'object')
     .map((item) => ({
-      name: String(item.name || '').trim(),
+      name: normalizeSourceItemName(String(item.name || '').trim(), source),
       summary: String(item.summary || '').trim(),
       highlight: String(item.highlight || '').trim(),
       publishedAt: String(item.publishedAt || source.officialPublishedAt || '').trim(),
@@ -421,7 +435,7 @@ function deduplicateItems(items, historyFingerprints) {
   const deduplicated = [];
 
   for (const item of items) {
-    const fingerprint = `${item.name}|${item.sourceUrl}`.toLowerCase();
+    const fingerprint = createFingerprint(item);
 
     if (seen.has(fingerprint)) {
       continue;

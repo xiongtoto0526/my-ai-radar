@@ -1,6 +1,13 @@
 {
-  "updatedAt": "2026-03-22T02:34:18.814Z",
+  "updatedAt": "2026-03-22T03:04:04.688Z",
   "items": [
+    {
+      "fingerprint": "gemini api|2026-03-19|https://ai.google.dev/gemini-api/docs/changelog#03-19-2026",
+      "name": "Gemini API",
+      "publishedAt": "2026-03-19",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/changelog#03-19-2026",
+      "createdAt": "2026-03-22T03:01:59.537Z"
+    },
     {
       "fingerprint": "composer 2|2026-03-19t00:00:00.000z|https://cursor.com/blog/composer-2",
       "name": "Composer 2",
