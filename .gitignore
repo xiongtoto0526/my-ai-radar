@@ -1,3 +1,4 @@
 node_modules/
 .env
 data/history.json.bak
+git-hub-account.md

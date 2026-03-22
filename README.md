@@ -1,6 +1,22 @@
 # AI Daily Radar
 
-一个轻量级 Node.js 工具项目，用于定时抓取 AI 站点内容，通过兼容 OpenAI 的模型提炼产品摘要，再把结果推送到企业微信机器人。
+一个轻量级 Node.js 工具项目，用于抓取 AI 产品 changelog 页面，提取每个来源的最新一条官方更新，补充发布时间和摘要后，推送到企业微信机器人。
+
+## 当前行为
+
+- 抓取通过 `https://r.jina.ai/{URL}` 获取 Markdown。
+- 对 changelog 类来源只取“最新一条”更新，而不是整页多条历史记录。
+- 如果页面存在官方发布时间，会在推送消息里展示。
+- 链接会使用企业微信 Markdown 可点击格式。
+- `data/history.json` 使用 `name + publishedAt + sourceUrl` 做去重。
+- 某个来源抓取失败或模型解析失败，不会中断其他来源。
+
+## 当前默认来源
+
+- GitHub Copilot Changelog
+- Cursor Changelog
+
+也可以通过 `.env` 里的 `RADAR_TARGET_URLS` 覆盖。
 
 ## 本地运行
 
@@ -25,10 +41,18 @@ npm run radar
 ## 环境变量
 
 - `LLM_API_KEY`: LLM 接口密钥
-- `LLM_BASE_URL`: 兼容 OpenAI 的接口地址，例如 `https://api.openai.com/v1`
+- `LLM_BASE_URL`: 兼容 OpenAI 的接口地址
 - `WECHAT_WEBHOOK`: 企业微信机器人 Webhook 地址
-- `LLM_MODEL`: 可选，默认 `gpt-4o-mini`
+- `LLM_MODEL`: 可选，OpenRouter 默认推荐 `openrouter/free`
+- `LLM_MODEL_FALLBACKS`: 可选，逗号分隔的备用模型列表
 - `RADAR_TARGET_URLS`: 可选，逗号分隔的抓取地址列表
+
+## OpenRouter 示例
+
+```env
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL=openrouter/free
+```
 
 ## 项目结构
 
@@ -44,24 +68,54 @@ npm run radar
 └── src/scraper.js
 ```
 
-## 说明
+## 运行日志
 
-- 抓取使用 `https://r.jina.ai/{URL}`。
-- 每个来源抓取失败不会中断整体流程。
-- 当模型无结果或解析失败时，会退化为发送“今日暂无重大更新”。
-- `data/history.json` 用于本地或单次运行时去重；如果希望 GitHub Actions 跨天保留历史，需要额外接入持久化方案。
+运行时会输出：
 
-## OpenRouter 配置示例
+- 每个来源抽取到的条目数量
+- 每条最终选中的标题、发布时间、直达链接
+- 去重前后的数量统计
 
-推荐把密钥只放在 `.env` 或 GitHub Secrets 中，不要写进仓库文件。
+这样可以直接排查“为什么是 0 条”或者“为什么选中了错误的最新更新”。
 
-```env
+## GitHub Actions
+
+仓库已包含 GitHub Actions 工作流文件：[.github/workflows/daily_radar.yml](.github/workflows/daily_radar.yml#L1)
+
+工作流支持：
+
+- 每天 `UTC 01:00` 自动执行
+- `workflow_dispatch` 手动触发
+- 使用 `npm ci` 安装依赖
+- 执行前先跑 `npm run check`
+- 通过 Actions cache 持久化 `data/history.json`，避免每次都从空历史开始
+
+需要在仓库 Secrets 中配置：
+
+- `LLM_API_KEY`
+- `LLM_BASE_URL`
+- `WECHAT_WEBHOOK`
+- `LLM_MODEL`
+- `LLM_MODEL_FALLBACKS`
+- `RADAR_TARGET_URLS`
+
+推荐的 GitHub Secrets 示例：
+
+```text
+LLM_API_KEY=your_openrouter_key
 LLM_BASE_URL=https://openrouter.ai/api/v1
+WECHAT_WEBHOOK=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
 LLM_MODEL=openrouter/free
+LLM_MODEL_FALLBACKS=
+RADAR_TARGET_URLS=https://github.blog/changelog/label/copilot,https://cursor.com/changelog
 ```
 
-## WECHAT_WEBHOOK
-Xmaster的企业微信，幸福之家团队
+配置步骤：
 
-## todo
-github action integration
+1. 打开仓库 `Settings -> Secrets and variables -> Actions`
+2. 逐个新增上面的 secrets
+3. 打开 `Actions` 页面
+4. 找到 `Daily AI Radar`
+5. 点击 `Run workflow` 先手动验证一次
+
+如果手动运行通过，后续就会按 cron 自动执行。

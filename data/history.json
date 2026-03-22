@@ -1,17 +1,19 @@
 {
-  "updatedAt": "2026-03-22T02:27:29.514Z",
+  "updatedAt": "2026-03-22T02:34:18.814Z",
   "items": [
     {
-      "fingerprint": "cursor marketplace新增插件|https://cursor.com/changelog",
-      "name": "Cursor Marketplace新增插件",
-      "sourceUrl": "https://cursor.com/changelog",
-      "createdAt": "2026-03-22T02:27:29.514Z"
+      "fingerprint": "composer 2|2026-03-19t00:00:00.000z|https://cursor.com/blog/composer-2",
+      "name": "Composer 2",
+      "publishedAt": "2026-03-19T00:00:00.000Z",
+      "sourceUrl": "https://cursor.com/blog/composer-2",
+      "createdAt": "2026-03-22T02:34:18.814Z"
     },
     {
-      "fingerprint": "copilot usage metrics|https://github.blog/changelog/label/copilot",
-      "name": "Copilot usage metrics",
-      "sourceUrl": "https://github.blog/changelog/label/copilot",
-      "createdAt": "2026-03-22T02:27:29.514Z"
+      "fingerprint": "github copilot|2026-03-20|https://github.blog/changelog/2026-03-20-copilot-usage-metrics-now-resolve-auto-model-selection-to-actual-models",
+      "name": "GitHub Copilot",
+      "publishedAt": "2026-03-20",
+      "sourceUrl": "https://github.blog/changelog/2026-03-20-copilot-usage-metrics-now-resolve-auto-model-selection-to-actual-models",
+      "createdAt": "2026-03-22T02:34:18.814Z"
     }
   ]
 }

@@ -5,9 +5,13 @@ on:
     - cron: '0 1 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   run-radar:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,8 +22,27 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Restore history cache
+        id: restore-history
+        uses: actions/cache/restore@v4
+        with:
+          path: data/history.json
+          key: daily-radar-history-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            daily-radar-history-${{ github.ref_name }}-
+
+      - name: Ensure history file exists
+        run: |
+          mkdir -p data
+          if [ ! -f data/history.json ]; then
+            printf '{\n  "updatedAt": null,\n  "items": []\n}\n' > data/history.json
+          fi
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Validate source files
+        run: npm run check
 
       - name: Run daily radar
         env:
@@ -27,5 +50,13 @@ jobs:
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
           WECHAT_WEBHOOK: ${{ secrets.WECHAT_WEBHOOK }}
           LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          LLM_MODEL_FALLBACKS: ${{ secrets.LLM_MODEL_FALLBACKS }}
           RADAR_TARGET_URLS: ${{ secrets.RADAR_TARGET_URLS }}
         run: npm run radar
+
+      - name: Save updated history cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/history.json
+          key: daily-radar-history-${{ github.ref_name }}-${{ github.run_id }}

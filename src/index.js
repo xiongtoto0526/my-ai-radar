@@ -25,12 +25,18 @@ async function run() {
       const items = await processSource(source, config, historyFingerprints);
       collectedItems.push(...items);
       console.log(`[processor] ${source.name}: extracted ${items.length} item(s)`);
+
+      for (const item of items) {
+        const publishedAtLabel = item.publishedAt || 'unknown';
+        console.log(`[item] ${source.name}: ${item.name} | publishedAt=${publishedAtLabel} | url=${item.sourceUrl}`);
+      }
     } catch (error) {
       console.error(`[processor] ${source.name} failed: ${error.message}`);
     }
   }
 
   const deduplicatedItems = deduplicateItems(collectedItems, historyFingerprints);
+  console.log(`[dedupe] ${collectedItems.length} item(s) before dedupe, ${deduplicatedItems.length} item(s) after dedupe`);
   const message = formatRadarMessage(deduplicatedItems);
 
   await sendWechatNotification(config.wechatWebhook, message);
