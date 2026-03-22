@@ -22,7 +22,7 @@ async function readHistory(filePath) {
 }
 
 function createFingerprint(item) {
-  return `${item.name || ''}|${item.sourceUrl || ''}`.trim().toLowerCase();
+  return `${item.name || ''}|${item.publishedAt || ''}|${item.sourceUrl || ''}`.trim().toLowerCase();
 }
 
 function mergeHistory(history, items, maxHistoryItems) {
@@ -41,6 +41,7 @@ function mergeHistory(history, items, maxHistoryItems) {
     mergedItems.unshift({
       fingerprint,
       name: item.name,
+      publishedAt: item.publishedAt || '',
       sourceUrl: item.sourceUrl,
       createdAt: now
     });

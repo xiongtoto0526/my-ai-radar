@@ -62,3 +62,6 @@ LLM_MODEL=openrouter/free
 
 ## WECHAT_WEBHOOK
 Xmaster的企业微信，幸福之家团队
+
+## todo
+github action integration

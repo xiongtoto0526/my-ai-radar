@@ -1,4 +1,17 @@
 {
-  "updatedAt": null,
-  "items": []
+  "updatedAt": "2026-03-22T02:27:29.514Z",
+  "items": [
+    {
+      "fingerprint": "cursor marketplace新增插件|https://cursor.com/changelog",
+      "name": "Cursor Marketplace新增插件",
+      "sourceUrl": "https://cursor.com/changelog",
+      "createdAt": "2026-03-22T02:27:29.514Z"
+    },
+    {
+      "fingerprint": "copilot usage metrics|https://github.blog/changelog/label/copilot",
+      "name": "Copilot usage metrics",
+      "sourceUrl": "https://github.blog/changelog/label/copilot",
+      "createdAt": "2026-03-22T02:27:29.514Z"
+    }
+  ]
 }

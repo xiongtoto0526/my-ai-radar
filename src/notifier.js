@@ -8,10 +8,11 @@ function formatRadarMessage(items) {
   const blocks = items.map((item, index) => {
     return [
       `**${index + 1}. [${item.name}](${item.sourceUrl})**`,
+      item.publishedAt ? `- 发布时间：${item.publishedAt}` : null,
       `- 功能：${item.summary}`,
       `- 亮点：${item.highlight}`,
       `- 原文：[点击查看](${item.sourceUrl})`
-    ].join('\n');
+    ].filter(Boolean).join('\n');
   });
 
   return [`### 每日 AI 雷达 (${date})`, '---', ...blocks.map((block) => `${block}\n---`), '*更多详情请查看原始链接...*'].join('\n');

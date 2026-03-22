@@ -7,9 +7,10 @@ function buildMessages(source, knownFingerprints) {
     '剔除广告、招聘、重复内容、纯新闻稿、明显过时的信息。',
     '输出必须是 JSON 对象，且不要附加 Markdown 代码块。',
     'JSON 顶层字段固定为 items。',
-    'items 中每个对象字段固定为: name, summary, highlight。',
+    'items 中每个对象字段固定为: name, summary, highlight, publishedAt。',
     'summary 必须是 20 个汉字以内的核心功能描述。',
     'highlight 是一句话推荐理由。',
+    'publishedAt 填官方发布时间；如果页面里没有明确时间，返回空字符串。',
     source.extractStrategy === 'latest-release'
       ? '只返回 1 条最新更新，不要把历史多天的更新一起返回。'
       : '如果没有合适内容，返回 {"items":[]}。',
@@ -19,12 +20,14 @@ function buildMessages(source, knownFingerprints) {
   const userPrompt = [
     `来源名称: ${source.name}`,
     `来源链接: ${source.sourceUrl}`,
+    source.entryUrl && source.entryUrl !== source.sourceUrl ? `最新条目直达链接: ${source.entryUrl}` : null,
+    source.officialPublishedAt ? `已从页面规则提取到官方发布时间: ${source.officialPublishedAt}` : null,
     knownFingerprints.length > 0
       ? `以下产品已在历史记录中出现过，请尽量避免重复: ${knownFingerprints.join(' ; ')}`
       : '当前没有历史产品记录。',
     '以下是网页 Markdown 内容，请仅基于内容输出 JSON 对象:',
     source.content
-  ].join('\n\n');
+  ].filter(Boolean).join('\n\n');
 
   return [
     { role: 'system', content: systemPrompt },
@@ -257,7 +260,7 @@ function parseLlmResponse(messageContent) {
   throw new Error('Failed to parse structured JSON from LLM response');
 }
 
-function sanitizeItems(items, sourceUrl) {
+function sanitizeItems(items, source) {
   if (!Array.isArray(items)) {
     return [];
   }
@@ -268,7 +271,8 @@ function sanitizeItems(items, sourceUrl) {
       name: String(item.name || '').trim(),
       summary: String(item.summary || '').trim(),
       highlight: String(item.highlight || '').trim(),
-      sourceUrl
+      publishedAt: String(item.publishedAt || source.officialPublishedAt || '').trim(),
+      sourceUrl: source.entryUrl || source.sourceUrl
     }))
     .filter((item) => item.name && item.summary && item.highlight);
 }
@@ -350,7 +354,7 @@ async function processSource(source, config, knownFingerprints) {
       role: 'user',
       content: [
         '请严格返回如下 JSON 结构:',
-        '{"items":[{"name":"产品名","summary":"20字内功能","highlight":"一句话推荐理由"}]}',
+        '{"items":[{"name":"产品名","summary":"20字内功能","highlight":"一句话推荐理由","publishedAt":"官方发布时间，没有则为空字符串"}]}',
         '如果没有合适结果，返回 {"items":[]}。'
       ].join('\n')
     }
@@ -406,10 +410,10 @@ async function processSource(source, config, knownFingerprints) {
   const parsed = parseLlmResponse(messageContent);
 
   if (Array.isArray(parsed)) {
-    return applySourceStrategy(sanitizeItems(parsed, source.sourceUrl), source);
+    return applySourceStrategy(sanitizeItems(parsed, source), source);
   }
 
-  return applySourceStrategy(sanitizeItems(parsed.items, source.sourceUrl), source);
+  return applySourceStrategy(sanitizeItems(parsed.items, source), source);
 }
 
 function deduplicateItems(items, historyFingerprints) {
