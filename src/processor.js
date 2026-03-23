@@ -338,6 +338,7 @@ function getRetryDelayMs(attempt) {
 async function requestCompletion(messages, model, config) {
   const response = await fetch(`${config.llmBaseUrl}/chat/completions`, {
     method: 'POST',
+    signal: AbortSignal.timeout(config.llmRequestTimeoutMs),
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${config.llmApiKey}`,

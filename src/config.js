@@ -108,6 +108,8 @@ function getRuntimeConfig() {
   const normalizedBaseUrl = llmBaseUrl ? normalizeBaseUrl(llmBaseUrl) : '';
 
   return {
+    apiKey: process.env.RADAR_API_KEY,
+    apiPort: Number(process.env.PORT || process.env.RADAR_API_PORT || 3000),
     llmApiKey,
     llmBaseUrl: normalizedBaseUrl,
     llmModel: process.env.LLM_MODEL || getDefaultModel(normalizedBaseUrl),
@@ -117,6 +119,7 @@ function getRuntimeConfig() {
     maxContentChars: 10000,
     maxHistoryItems: 500,
     requestTimeoutMs: 30000,
+    llmRequestTimeoutMs: Number(process.env.LLM_REQUEST_TIMEOUT_MS || 45000),
     historyFilePath: path.resolve(__dirname, '..', 'data', 'history.json')
   };
 }
@@ -141,10 +144,23 @@ function validateRequiredEnv(config) {
   }
 }
 
+function validateApiServerEnv(config) {
+  validateRequiredEnv(config);
+
+  if (!config.apiKey) {
+    throw new Error('Missing required environment variables: RADAR_API_KEY');
+  }
+
+  if (!Number.isInteger(config.apiPort) || config.apiPort <= 0) {
+    throw new Error('RADAR_API_PORT or PORT must be a valid positive integer');
+  }
+}
+
 module.exports = {
   DEFAULT_TARGET_SITES,
   getRuntimeConfig,
   getDefaultModel,
   getDefaultFallbackModels,
+  validateApiServerEnv,
   validateRequiredEnv
 };

@@ -1,19 +1,31 @@
 {
+<<<<<<< HEAD
   "updatedAt": "2026-03-23T01:41:30.840Z",
+=======
+  "updatedAt": "2026-03-23T01:10:54.768Z",
+>>>>>>> 3bc7fa9 (feat: support api)
   "items": [
     {
       "fingerprint": "composer 2|2026-03-19t00:00:00.000z|https://cursor.com/blog/composer-2",
       "name": "Composer 2",
       "publishedAt": "2026-03-19T00:00:00.000Z",
       "sourceUrl": "https://cursor.com/blog/composer-2",
+<<<<<<< HEAD
       "createdAt": "2026-03-23T01:41:30.840Z"
+=======
+      "createdAt": "2026-03-23T01:10:54.768Z"
+>>>>>>> 3bc7fa9 (feat: support api)
     },
     {
       "fingerprint": "github copilot|2026-03-20|https://github.blog/changelog/2026-03-20-copilot-usage-metrics-now-resolve-auto-model-selection-to-actual-models",
       "name": "GitHub Copilot",
       "publishedAt": "2026-03-20",
       "sourceUrl": "https://github.blog/changelog/2026-03-20-copilot-usage-metrics-now-resolve-auto-model-selection-to-actual-models",
+<<<<<<< HEAD
       "createdAt": "2026-03-23T01:41:30.840Z"
+=======
+      "createdAt": "2026-03-23T01:10:54.768Z"
+>>>>>>> 3bc7fa9 (feat: support api)
     }
   ]
 }

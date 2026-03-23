@@ -39,6 +39,12 @@ cp .env.example .env
 npm run radar
 ```
 
+4. 启动 API 服务
+
+```bash
+npm run serve
+```
+
 ## 环境变量
 
 - `LLM_API_KEY`: LLM 接口密钥
@@ -46,7 +52,10 @@ npm run radar
 - `WECHAT_WEBHOOK`: 企业微信机器人 Webhook 地址
 - `LLM_MODEL`: 可选，OpenRouter 默认推荐 `openrouter/free`
 - `LLM_MODEL_FALLBACKS`: 可选，逗号分隔的备用模型列表
+- `LLM_REQUEST_TIMEOUT_MS`: 可选，单次 LLM 请求超时，默认 `45000`
 - `RADAR_TARGET_URLS`: 可选，逗号分隔的抓取地址列表
+- `RADAR_API_KEY`: API 服务调用密钥
+- `RADAR_API_PORT`: API 服务监听端口，默认 `3000`
 
 ## OpenRouter 示例
 
@@ -54,6 +63,51 @@ npm run radar
 LLM_BASE_URL=https://openrouter.ai/api/v1
 LLM_MODEL=openrouter/free
 ```
+
+## API 服务
+
+项目现在同时支持两种运行方式：
+
+- `npm run radar`: 直接执行一次任务，适合 GitHub Actions 定时跑
+- `npm run serve`: 启动 HTTP API 服务，适合你手动或外部系统触发
+
+API 端点：
+
+- `GET /health`: 健康检查
+- `POST /run`: 触发一次雷达任务
+
+认证方式：
+
+- 请求头 `x-api-key: <RADAR_API_KEY>`
+- 或 `Authorization: Bearer <RADAR_API_KEY>`
+
+调用示例：
+
+```bash
+curl -X POST http://localhost:3000/run \
+	-H "Content-Type: application/json" \
+	-H "x-api-key: your_api_key" \
+	-d '{}'
+```
+
+如果你只想执行但不发送企业微信，可以传：
+
+```bash
+curl -X POST http://localhost:3000/run \
+	-H "Content-Type: application/json" \
+	-H "x-api-key: your_api_key" \
+	-d '{"notify":false}'
+```
+
+返回结果会包含：
+
+- 每个来源的执行状态
+- 本次抽取数量
+- 去重后数量
+- 最终条目列表
+- 最新生成的消息内容
+
+注意：`POST /run` 是同步接口，会等本次抓取和 LLM 处理全部完成后再返回。如果某个外部来源或 LLM 较慢，请求会等更久。当前代码已经为单次 LLM 请求加了超时控制，避免无限挂起。
 
 ## 项目结构
 
@@ -90,6 +144,7 @@ LLM_MODEL=openrouter/free
 - 使用 `npm ci` 安装依赖
 - 执行前先跑 `npm run check`
 - 每次运行后自动把最新的 `data/history.json` 提交回仓库，作为去重历史
+- 仍然使用 `npm run radar` 直接执行，不依赖 API 服务
 
 关于 `history.json` 的持久化行为：
 
