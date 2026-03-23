@@ -1,5 +1,3 @@
-const path = require('path');
-
 const DEFAULT_TARGET_SITES = [
   {
     name: 'GitHub Copilot Changelog',
@@ -17,6 +15,8 @@ const DEFAULT_TARGET_SITES = [
     extractStrategy: 'latest-release'
   }
 ];
+
+const HISTORY_COLLECTION_NAME = 'history_items';
 
 function normalizeBaseUrl(baseUrl) {
   return baseUrl.replace(/\/$/, '');
@@ -104,6 +104,7 @@ function getTargetSiteName(url, index) {
 function getRuntimeConfig() {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmBaseUrl = process.env.LLM_BASE_URL;
+  const mongodbUri = process.env.MONGODB_URI;
   const wechatWebhook = process.env.WECHAT_WEBHOOK;
   const normalizedBaseUrl = llmBaseUrl ? normalizeBaseUrl(llmBaseUrl) : '';
 
@@ -114,13 +115,15 @@ function getRuntimeConfig() {
     llmBaseUrl: normalizedBaseUrl,
     llmModel: process.env.LLM_MODEL || getDefaultModel(normalizedBaseUrl),
     llmModelFallbacks: parseFallbackModels(process.env.LLM_MODEL_FALLBACKS, normalizedBaseUrl),
+    mongodbCollectionName: HISTORY_COLLECTION_NAME,
+    mongodbDbName: process.env.MONGODB_DB_NAME || 'my_ai_radar',
+    mongodbUri,
     wechatWebhook,
     targetSites: parseTargetSites(process.env.RADAR_TARGET_URLS),
     maxContentChars: 10000,
     maxHistoryItems: 500,
     requestTimeoutMs: 30000,
-    llmRequestTimeoutMs: Number(process.env.LLM_REQUEST_TIMEOUT_MS || 45000),
-    historyFilePath: path.resolve(__dirname, '..', 'data', 'history.json')
+    llmRequestTimeoutMs: Number(process.env.LLM_REQUEST_TIMEOUT_MS || 45000)
   };
 }
 
@@ -133,6 +136,10 @@ function validateRequiredEnv(config) {
 
   if (!config.llmBaseUrl) {
     missingKeys.push('LLM_BASE_URL');
+  }
+
+  if (!config.mongodbUri) {
+    missingKeys.push('MONGODB_URI');
   }
 
   if (!config.wechatWebhook) {

@@ -1,5 +1,5 @@
 const { getRuntimeConfig, validateRequiredEnv } = require('./config');
-const { readHistory, writeHistory, mergeHistory, createFingerprint } = require('./historyStore');
+const { appendHistory, readHistory } = require('./historyStore');
 const { scrapeSites } = require('./scraper');
 const { processSource, deduplicateItems } = require('./processor');
 const { formatRadarMessage, sendWechatNotification } = require('./notifier');
@@ -9,7 +9,7 @@ async function runRadar(options = {}) {
   validateRequiredEnv(config);
 
   const shouldNotify = options.notify !== false;
-  const history = await readHistory(config.historyFilePath);
+  const history = await readHistory(config);
   const historyFingerprints = history.items.map((item) => item.fingerprint).filter(Boolean);
   const scrapedResults = await scrapeSites(config.targetSites, config);
   const collectedItems = [];
@@ -62,12 +62,7 @@ async function runRadar(options = {}) {
     console.log(`[notifier] sent ${deduplicatedItems.length} item(s) to WeChat`);
   }
 
-  const historyToPersist = mergeHistory(history, deduplicatedItems.map((item) => ({
-    ...item,
-    fingerprint: createFingerprint(item)
-  })), config.maxHistoryItems);
-
-  await writeHistory(config.historyFilePath, historyToPersist);
+  const historyToPersist = await appendHistory(config, deduplicatedItems);
 
   return {
     triggeredAt: new Date().toISOString(),

@@ -31,10 +31,11 @@
 
 ### 1. 数据来源
 
-目前默认抓取两个 changelog 页面：
+目前默认抓取三个 changelog 页面：
 
 - GitHub Copilot Changelog
 - Cursor Changelog
+- Gemini API Changelog
 
 也支持通过环境变量 `RADAR_TARGET_URLS` 自定义来源。
 
@@ -65,7 +66,7 @@
 
 ### 4. 去重逻辑
 
-项目会把历史结果写入 `data/history.json`。
+项目会把历史结果写入 MongoDB 集合。
 
 当前的去重规则是：
 
@@ -97,7 +98,7 @@
 
 - 依赖安装
 - 代码检查
-- `history.json` 的缓存持久化
+- MongoDB 历史数据读写
 
 ### 7. 当前状态
 
@@ -105,7 +106,8 @@
 
 - 本地可运行
 - 企业微信可推送
+- API 服务可触发
 - changelog 只取最新一条
 - 发布时间可提取并展示
 - GitHub Actions 可自动定时执行
-- 历史记录可用于去重
+- 历史记录可通过 MongoDB 去重

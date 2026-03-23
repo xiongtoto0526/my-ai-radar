@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/health",
+      "destination": "/api/health"
+    },
+    {
+      "source": "/history",
+      "destination": "/api/history"
+    },
+    {
+      "source": "/run",
+      "destination": "/api/run"
+    }
+  ]
+}

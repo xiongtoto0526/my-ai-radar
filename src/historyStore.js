@@ -1,65 +1,101 @@
-const fs = require('fs/promises');
+const { MongoClient } = require('mongodb');
 
-async function readHistory(filePath) {
-  try {
-    const fileContent = await fs.readFile(filePath, 'utf8');
-    const parsed = JSON.parse(fileContent);
+let clientPromise;
+let indexesReadyPromise;
 
-    return {
-      updatedAt: parsed.updatedAt || null,
-      items: Array.isArray(parsed.items) ? parsed.items : []
-    };
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return {
-        updatedAt: null,
-        items: []
-      };
-    }
-
-    throw error;
+function getMongoClient(mongodbUri) {
+  if (!clientPromise) {
+    const client = new MongoClient(mongodbUri);
+    clientPromise = client.connect();
   }
+
+  return clientPromise;
+}
+
+async function getHistoryCollection(config) {
+  const client = await getMongoClient(config.mongodbUri);
+  const collection = client
+    .db(config.mongodbDbName)
+    .collection(config.mongodbCollectionName);
+
+  if (!indexesReadyPromise) {
+    indexesReadyPromise = Promise.all([
+      collection.createIndex({ fingerprint: 1 }, { unique: true }),
+      collection.createIndex({ createdAt: -1 })
+    ]);
+  }
+
+  await indexesReadyPromise;
+  return collection;
+}
+
+async function readHistory(config) {
+  const collection = await getHistoryCollection(config);
+  const items = await collection
+    .find({}, { projection: { _id: 0 } })
+    .sort({ createdAt: -1 })
+    .limit(config.maxHistoryItems)
+    .toArray();
+
+  return {
+    updatedAt: items[0]?.createdAt || null,
+    items
+  };
 }
 
 function createFingerprint(item) {
   return `${item.name || ''}|${item.publishedAt || ''}|${item.sourceUrl || ''}`.trim().toLowerCase();
 }
 
-function mergeHistory(history, items, maxHistoryItems) {
+async function appendHistory(config, items) {
+  if (!items.length) {
+    return readHistory(config);
+  }
+
+  const collection = await getHistoryCollection(config);
   const now = new Date().toISOString();
-  const existingFingerprints = new Set(history.items.map((item) => item.fingerprint));
-  const mergedItems = [...history.items];
 
   for (const item of items) {
     const fingerprint = createFingerprint(item);
 
-    if (!fingerprint || existingFingerprints.has(fingerprint)) {
+    if (!fingerprint) {
       continue;
     }
 
-    existingFingerprints.add(fingerprint);
-    mergedItems.unshift({
-      fingerprint,
-      name: item.name,
-      publishedAt: item.publishedAt || '',
-      sourceUrl: item.sourceUrl,
-      createdAt: now
+    await collection.updateOne(
+      { fingerprint },
+      {
+        $setOnInsert: {
+          fingerprint,
+          name: item.name,
+          publishedAt: item.publishedAt || '',
+          sourceUrl: item.sourceUrl,
+          createdAt: now
+        }
+      },
+      { upsert: true }
+    );
+  }
+
+  const overflowItems = await collection
+    .find({}, { projection: { _id: 1 } })
+    .sort({ createdAt: -1 })
+    .skip(config.maxHistoryItems)
+    .toArray();
+
+  if (overflowItems.length) {
+    await collection.deleteMany({
+      _id: {
+        $in: overflowItems.map((item) => item._id)
+      }
     });
   }
 
-  return {
-    updatedAt: now,
-    items: mergedItems.slice(0, maxHistoryItems)
-  };
-}
-
-async function writeHistory(filePath, history) {
-  await fs.writeFile(filePath, `${JSON.stringify(history, null, 2)}\n`, 'utf8');
+  return readHistory(config);
 }
 
 module.exports = {
+  appendHistory,
   createFingerprint,
-  mergeHistory,
-  readHistory,
-  writeHistory
+  readHistory
 };
