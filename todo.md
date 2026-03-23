@@ -3,7 +3,14 @@
 ## Goal
 
 最终部署组合：
-
+3. 创建项目时保持默认设置即可
+   - Framework Preset 不需要手动改
+   - Root Directory 保持仓库根目录
+   - Build Command 留空，使用默认行为
+   - Output Directory 留空
+   - Install Command 留空
+4. 进入 `Project Settings -> Environment Variables`
+5. 把下面这些变量逐项填进去：
 - GitHub Actions 负责每日定时执行
 - Vercel 负责暴露手动触发 API
 - MongoDB Atlas M0 负责共享去重历史
@@ -14,10 +21,36 @@
 
 1. 打开 MongoDB Atlas 官网并登录
    - 地址：`https://www.mongodb.com/cloud/atlas/register`
-   - 如果没有账号，先注册一个个人账号
+6. `RADAR_API_KEY` 使用你本地 `.env` 当前这一个值，保持本地和线上一致
+   - `29d64040c2aa79163b10a91709778baff4ae2e6a75c52609e9d18b124299a62f`
+7. 保存环境变量后触发一次 Deploy
+8. 部署完成后，先打开：
 
+9. 再验证历史接口：
 2. 创建 Project
+10. 最后再手动触发一次运行：
    - 点击 `New Project`
+11. 第一次建议用不发通知的方式验证
+   - Body: `{"notify": false}`
+12. 如果 `/health` 正常、`/history` 能返回数据、`/run` 能执行成功，说明 Vercel 这部分已经完成
+
+可直接参考的验证顺序：
+
+- `GET /health`
+- `GET /history?limit=20`
+- `POST /run`
+
+可直接参考的请求头：
+
+- `x-api-key: 29d64040c2aa79163b10a91709778baff4ae2e6a75c52609e9d18b124299a62f`
+
+可直接参考的 `POST /run` 请求体：
+
+```json
+{"notify": false}
+```
+
+部署完成后，验证：
    - Project Name 建议填：`my-ai-radar`
    - 直接创建，不需要额外团队成员
 
@@ -97,8 +130,14 @@ mongodb+srv://radar_user:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true
 
 1. 登录 Vercel
 2. 导入当前 GitHub 仓库
-3. 不需要自定义 build command
-4. 在 Project Settings -> Environment Variables 中填入：
+3. 创建项目时保持默认设置即可
+   - Framework Preset 不需要手动改
+   - Root Directory 保持仓库根目录
+   - Build Command 留空，使用默认行为
+   - Output Directory 留空
+   - Install Command 留空
+4. 首次导入完成后，进入 `Project Settings -> Environment Variables`
+5. 把下面这些变量逐项填进去：
    - `LLM_API_KEY`
    - `LLM_BASE_URL`
    - `MONGODB_URI`
@@ -109,10 +148,20 @@ mongodb+srv://radar_user:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true
    - `LLM_REQUEST_TIMEOUT_MS`
    - `RADAR_TARGET_URLS`
    - `RADAR_API_KEY`
-5. 部署完成后，验证：
+6. `RADAR_API_KEY` 填你当前本地 `.env` 里的这个值，保持本地和线上一致：
+   - `29d64040c2aa79163b10a91709778baff4ae2e6a75c52609e9d18b124299a62f`
+7. 保存环境变量后，触发一次 Deploy
+8. 部署完成后，先验证：
    - `GET /health`
+9. 再验证：
    - `GET /history?limit=20`
+10. 最后再手动调用：
    - `POST /run`
+11. 第一次调用 `POST /run` 建议传：
+   - `{"notify": false}`
+12. 请求头使用：
+   - `x-api-key: 29d64040c2aa79163b10a91709778baff4ae2e6a75c52609e9d18b124299a62f`
+13. 如果 `/health`、`/history`、`/run` 都正常，说明 Vercel 部署完成
 
 ### 5. 配置 GitHub Actions Secrets
 

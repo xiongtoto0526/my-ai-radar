@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { getRuntimeConfig, validateApiServerEnv } = require('./config');
+const { getRuntimeConfig, validateApiServerEnv, validateHistoryApiEnv } = require('./config');
 const { runRadar } = require('./radarRunner');
 const { readHistory } = require('./historyStore');
 
@@ -102,28 +102,34 @@ function ensureAuthorized(request, response, runtimeConfig) {
 }
 
 async function handleHistory(request, response) {
-  const runtimeConfig = getRuntimeConfig();
-  validateApiServerEnv(runtimeConfig);
+  try {
+    const runtimeConfig = getRuntimeConfig();
+    validateHistoryApiEnv(runtimeConfig);
 
-  if (!ensureAuthorized(request, response, runtimeConfig)) {
-    return;
-  }
+    if (!ensureAuthorized(request, response, runtimeConfig)) {
+      return;
+    }
 
-  const limit = parseHistoryLimit(request);
-  if (!limit) {
-    sendJson(response, 400, {
-      error: 'Invalid limit query parameter'
+    const limit = parseHistoryLimit(request);
+    if (!limit) {
+      sendJson(response, 400, {
+        error: 'Invalid limit query parameter'
+      });
+      return;
+    }
+
+    const history = await readHistory(runtimeConfig);
+
+    sendJson(response, 200, {
+      updatedAt: history.updatedAt,
+      total: history.items.length,
+      items: history.items.slice(0, limit)
     });
-    return;
+  } catch (error) {
+    sendJson(response, 500, {
+      error: error.message
+    });
   }
-
-  const history = await readHistory(runtimeConfig);
-
-  sendJson(response, 200, {
-    updatedAt: history.updatedAt,
-    total: history.items.length,
-    items: history.items.slice(0, limit)
-  });
 }
 
 async function handleRun(request, response) {

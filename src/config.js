@@ -163,11 +163,28 @@ function validateApiServerEnv(config) {
   }
 }
 
+function validateHistoryApiEnv(config) {
+  const missingKeys = [];
+
+  if (!config.mongodbUri) {
+    missingKeys.push('MONGODB_URI');
+  }
+
+  if (!config.apiKey) {
+    missingKeys.push('RADAR_API_KEY');
+  }
+
+  if (missingKeys.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingKeys.join(', ')}`);
+  }
+}
+
 module.exports = {
   DEFAULT_TARGET_SITES,
   getRuntimeConfig,
   getDefaultModel,
   getDefaultFallbackModels,
   validateApiServerEnv,
+  validateHistoryApiEnv,
   validateRequiredEnv
 };

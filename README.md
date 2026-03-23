@@ -126,6 +126,10 @@ LLM_MODEL=openrouter/free
 - `Vercel`: 暴露手动调用 API
 - `MongoDB Atlas M0`: 存储去重历史
 
+当前线上地址：
+
+- `https://my-ai-radar.vercel.app/`
+
 API 端点：
 
 - `GET /health`: 健康检查
@@ -143,6 +147,12 @@ API 端点：
 - `/health`
 - `/history`
 - `/run`
+
+当前线上可直接访问：
+
+- `https://my-ai-radar.vercel.app/health`
+- `https://my-ai-radar.vercel.app/history?limit=20`
+- `https://my-ai-radar.vercel.app/run`
 
 认证方式：
 
@@ -179,6 +189,13 @@ curl -X POST http://localhost:3000/run \
 
 ```bash
 curl "http://localhost:3000/history?limit=20" \
+	-H "x-api-key: your_api_key"
+```
+
+线上调用示例：
+
+```bash
+curl "https://my-ai-radar.vercel.app/history?limit=20" \
 	-H "x-api-key: your_api_key"
 ```
 
@@ -254,7 +271,12 @@ curl "http://localhost:3000/history?limit=20" \
 - `RADAR_TARGET_URLS`
 - `RADAR_API_KEY`
 
-4. 部署完成后，用 `/health` 和 `/run` 验证
+4. 当前线上域名是 `https://my-ai-radar.vercel.app/`
+5. 部署完成后，优先用下面这些地址验证：
+
+- `https://my-ai-radar.vercel.app/health`
+- `https://my-ai-radar.vercel.app/history?limit=20`
+- `https://my-ai-radar.vercel.app/run`
 
 ### 逐步部署清单
 
